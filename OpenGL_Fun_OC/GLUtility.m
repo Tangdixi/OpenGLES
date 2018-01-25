@@ -19,7 +19,7 @@
     
     if (! shader) {
 #if DEBUG
-        NSLog(@"GLUtility: Create shader failed: %d", __LINE__);
+        NSLog(@"GLUtility: Create shader failed: %s, %d", __FUNCTION__, __LINE__);
 #endif
         return 0;
     }
@@ -33,7 +33,7 @@
     
     if (sourceError) {
 #if DEBUG
-        NSLog(@"GLUtility: Load shader file error: %d", __LINE__);
+        NSLog(@"GLUtility: Load shader file error: %s, %d", __FUNCTION__, __LINE__);
 #endif
         return 0;
     }
@@ -49,7 +49,7 @@
     if (! compiled) {
 #if DEBUG
         
-        NSLog(@"GLUtility: Compile shader failed: %d", __LINE__);
+        NSLog(@"GLUtility: Compile shader failed: %s, %d", __FUNCTION__, __LINE__);
         
         GLint infoLength = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLength);
@@ -81,7 +81,7 @@
     
     if (! program) {
 #if DEBUG
-        NSLog(@"GLUtility: Create program failed: %d", __LINE__);
+        NSLog(@"GLUtility: Create program failed: %s, %d", __FUNCTION__, __LINE__);
 #endif
         return 0;
     }
@@ -90,7 +90,7 @@
     //
     if (! vertexShader || ! fragmentShader) {
 #if DEBUG
-        NSLog(@"GLUtility: Invalid shader: %d", __LINE__);
+        NSLog(@"GLUtility: Invalid shader: %s, %d", __FUNCTION__, __LINE__);
 #endif
         return 0;
     }
@@ -99,7 +99,6 @@
     //
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
-    
     
     // 4. Link the program
     //
@@ -110,8 +109,7 @@
     
     if (! linked) {
 #if DEBUG
-        NSLog(@"GLUtility: Link program failed: %d", __LINE__);
-#endif
+        NSLog(@"GLUtility: Link program failed: %s, %d", __FUNCTION__, __LINE__);
         
         GLint infoLength = 0;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLength);
@@ -125,7 +123,7 @@
             
             free(infoLog);
         }
-        
+#endif
         glDeleteProgram(program);
         
         return 0;

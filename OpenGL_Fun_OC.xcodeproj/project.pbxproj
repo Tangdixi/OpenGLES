@@ -9,11 +9,12 @@
 /* Begin PBXBuildFile section */
 		81188C4A201823670058467E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 81188C49201823670058467E /* AppDelegate.m */; };
 		81188C4D201823670058467E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 81188C4C201823670058467E /* ViewController.m */; };
-		81188C50201823670058467E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81188C4E201823670058467E /* Main.storyboard */; };
 		81188C52201823670058467E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 81188C51201823670058467E /* Assets.xcassets */; };
 		81188C55201823670058467E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81188C53201823670058467E /* LaunchScreen.storyboard */; };
 		81188C58201823670058467E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 81188C57201823670058467E /* main.m */; };
 		81188C60201824660058467E /* GLUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 81188C5F201824660058467E /* GLUtility.m */; };
+		81188C62201995260058467E /* cube_vertex.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 81188C61201995260058467E /* cube_vertex.glsl */; };
+		81188C64201995680058467E /* cube_fragment.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 81188C63201995680058467E /* cube_fragment.glsl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,13 +23,14 @@
 		81188C49201823670058467E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		81188C4B201823670058467E /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		81188C4C201823670058467E /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		81188C4F201823670058467E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		81188C51201823670058467E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		81188C54201823670058467E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		81188C56201823670058467E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		81188C57201823670058467E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		81188C5E201824660058467E /* GLUtility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GLUtility.h; sourceTree = "<group>"; };
 		81188C5F201824660058467E /* GLUtility.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GLUtility.m; sourceTree = "<group>"; };
+		81188C61201995260058467E /* cube_vertex.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = cube_vertex.glsl; sourceTree = "<group>"; };
+		81188C63201995680058467E /* cube_fragment.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = cube_fragment.glsl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,13 +69,22 @@
 				81188C4C201823670058467E /* ViewController.m */,
 				81188C5E201824660058467E /* GLUtility.h */,
 				81188C5F201824660058467E /* GLUtility.m */,
-				81188C4E201823670058467E /* Main.storyboard */,
+				81188C652019959C0058467E /* Shaders */,
 				81188C51201823670058467E /* Assets.xcassets */,
 				81188C53201823670058467E /* LaunchScreen.storyboard */,
 				81188C56201823670058467E /* Info.plist */,
 				81188C57201823670058467E /* main.m */,
 			);
 			path = OpenGL_Fun_OC;
+			sourceTree = "<group>";
+		};
+		81188C652019959C0058467E /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				81188C61201995260058467E /* cube_vertex.glsl */,
+				81188C63201995680058467E /* cube_fragment.glsl */,
+			);
+			path = Shaders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -134,9 +145,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81188C62201995260058467E /* cube_vertex.glsl in Resources */,
 				81188C55201823670058467E /* LaunchScreen.storyboard in Resources */,
+				81188C64201995680058467E /* cube_fragment.glsl in Resources */,
 				81188C52201823670058467E /* Assets.xcassets in Resources */,
-				81188C50201823670058467E /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,14 +169,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		81188C4E201823670058467E /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				81188C4F201823670058467E /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		81188C53201823670058467E /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -287,6 +291,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5A88JF7M74;
 				INFOPLIST_FILE = OpenGL_Fun_OC/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "DC.OpenGL-Fun-OC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -301,6 +306,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5A88JF7M74;
 				INFOPLIST_FILE = OpenGL_Fun_OC/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "DC.OpenGL-Fun-OC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

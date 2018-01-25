@@ -6,10 +6,9 @@
 //  Copyright © 2018 DC. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
+@import GLKit;
 
-@interface ViewController : UIViewController
-
+@interface ViewController : GLKViewController
 
 @end
-
