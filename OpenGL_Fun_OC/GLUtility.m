@@ -137,4 +137,8 @@
     return program;
 }
 
+const void* bufferOffset(NSUInteger offset) {
+	return (const void*)(offset);
+}
+
 @end

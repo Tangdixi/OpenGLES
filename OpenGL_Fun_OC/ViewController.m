@@ -11,14 +11,15 @@
 
 @interface ViewController () <
     GLKViewDelegate
-> {
-    GLuint vbo;
-    GLuint ebo;
-}
+>
 
 @property (nonatomic, assign) GLuint program;
 @property (nonatomic, strong) GLKView *glkView;
 @property (nonatomic, strong) EAGLContext *context;
+
+@property (nonatomic, assign) GLuint vbo;
+@property (nonatomic, assign) GLuint ebo;
+@property (nonatomic, assign) GLuint vao;
 
 @end
 
@@ -37,7 +38,7 @@ GLuint colorLocation = 1;
     [self setupGL];
 }
 
-#pragma mark - Configuration
+#pragma mark - Private
 
 - (void)setupViews {
     self.view = self.glkView;
@@ -57,7 +58,76 @@ GLuint colorLocation = 1;
                                        fragmentShader:cubeFragmentShader];
 }
 
-#pragma mark - Private
+- (void)setupVBO {
+	
+	GLfloat vertices[3 * (3 + 4)] = {
+		0.0f,  0.5f, 0.0f,
+		1.0f,  0.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, 0.0f,
+		0.0f,  1.0f, 0.0f, 1.0f,
+		0.5f, -0.5f, 0.0f,
+		0.0f,  0.0f, 1.0f, 1.0f
+	};
+	
+	GLushort indices[3] = {
+		0, 1, 2
+	};
+	
+	if (! self.vbo && ! self.ebo) {
+		
+		// 1. Generate buffer object
+		//
+		glGenBuffers(1, &_vbo);
+		glGenBuffers(1, &_ebo);
+		
+		// 2. Binding
+		//
+		glBindBuffer(GL_ARRAY_BUFFER, self.vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 21, vertices, GL_STATIC_DRAW);
+		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 3 , indices, GL_STATIC_DRAW);
+	}
+	
+}
+
+- (void)setupVAOs {
+	
+	[self setupVBO];
+	
+	if (! self.vao) {
+		
+		// 1. Generate vertex array object
+		//
+		glGenVertexArrays(1, &_vao);
+		
+		// 2. Binding
+		//
+		glBindVertexArray(self.vao);
+		
+		// 3. Assign the values
+		//
+		glBindBuffer(GL_ARRAY_BUFFER, self.vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
+		
+		glVertexAttribPointer(vertexLocation,
+							  3,
+							  GL_FLOAT,
+							  GL_FALSE,
+							  7 * sizeof(GLfloat),
+							  0);
+		glEnableVertexAttribArray(vertexLocation);
+		
+		glVertexAttribPointer(colorLocation,
+							  4,
+							  GL_FLOAT,
+							  GL_FALSE,
+							  7 * sizeof(GLfloat),
+							  (const void *)(3 * sizeof(GLfloat)));
+		
+		glEnableVertexAttribArray(colorLocation);
+	}
+}
 
 - (void)drawWithoutVBO {
     
@@ -81,38 +151,10 @@ GLuint colorLocation = 1;
 
 - (void)drawWithVBO {
     
-    GLfloat vertices[3 * (3 + 4)] = {
-        0.0f,  0.5f, 0.0f,
-        1.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.0f,
-        0.0f,  1.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.0f, 1.0f, 1.0f
-    };
+	[self setupVBO];
     
-    GLushort indices[3] = {
-        0, 1, 2
-    };
-    
-    if (! vbo && ! ebo) {
-     
-        // 1. Generate buffer object
-        //
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ebo);
-        
-        // 2. Binding
-        //
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 21, vertices, GL_STATIC_DRAW);
-        
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 3 , indices, GL_STATIC_DRAW);
-        
-    }
-    
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBindBuffer(GL_ARRAY_BUFFER, self.vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
     
     glVertexAttribPointer(vertexLocation,
                           3,
@@ -128,11 +170,10 @@ GLuint colorLocation = 1;
                           GL_FALSE,
                           7 * sizeof(GLfloat),
                           (const void *)(3 * sizeof(GLfloat)));
+	
     glEnableVertexAttribArray(colorLocation);
     
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
-    
-    glDrawArrays(GL_TRIANGLES, 0, 3);
     
     glDisableVertexAttribArray(vertexLocation);
     glDisableVertexAttribArray(colorLocation);
@@ -142,9 +183,16 @@ GLuint colorLocation = 1;
 }
 
 - (void)drawWithVAO {
-    
-    
-    
+
+	// Setup the vao if needed
+	//
+	[self setupVAOs];
+	
+	// Draw the elements
+	//
+	glBindVertexArray (self.vao);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+	glBindVertexArray(0);
 }
 
 #pragma mark - GLKViewDelegate
@@ -155,9 +203,9 @@ GLuint colorLocation = 1;
     glClearColor(0.4, 0.4, 0.4, 1.0);
     glClear ( GL_COLOR_BUFFER_BIT );
     glUseProgram(self.program);
-    
-//    [self drawWithoutVBO];
-    [self drawWithVBO];
+	
+	[self setupVAOs];
+	[self drawWithVAO];
 }
 
 #pragma mark - Lazy Loading

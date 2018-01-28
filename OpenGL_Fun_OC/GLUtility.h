@@ -21,12 +21,17 @@ typedef NS_ENUM(GLuint, GLUtilityShaderType) {
  @brief Load a shader from a .glsl file in the bundle
  @param name The name of the shader
  @param type The shader type, aka, vertex or fragment
+ @return The shader's ID
  @seealso GLUtilityShaderType
  */
 + (GLuint)lodaShaderWithName:(NSString *)name type:(GLUtilityShaderType)type;
 
+/**
+ @brief Create a program with a vertex and fragment shader
+ @param vertexShader The vertex shader id
+ @param fragmentShader The fragment shader id
+ @return The program's ID
+ */
 + (GLuint)programWithVertexShader:(GLuint)vertexShader fragmentShader:(GLuint)fragmentShader;
-
-+ (GLuint)programWithName:(NSString *)name;
 
 @end
