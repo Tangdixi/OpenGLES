@@ -42,4 +42,6 @@ typedef NS_ENUM(GLuint, GLUtilityShaderType) {
  */
 + (GLubyte *)textureDatasWithImageName:(NSString *)imageName;
 
+CGFloat degreedToRadius(CGFloat degreed);
+
 @end

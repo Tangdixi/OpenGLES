@@ -37,9 +37,6 @@ GLuint colorLocation = 1;
     
     [self setupViews];
     [self setupGL];
-    
-    
-    
 }
 
 #pragma mark - Private
@@ -64,17 +61,16 @@ GLuint colorLocation = 1;
 
 - (void)setupVBO {
 	
-	GLfloat vertices[3 * (3 + 4)] = {
-		0.0f,  0.5f, 0.0f,
-		1.0f,  0.0f, 0.0f, 1.0f,
+	GLfloat vertices[12] = {
+		0.5f, 0.5f, 0.0f,
+		-0.5f, 0.5f, 0.0f,
 		-0.5f, -0.5f, 0.0f,
-		0.0f,  1.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f,  0.0f, 1.0f, 1.0f
+		0.5f, -0.5f, 0.0f
 	};
 	
-	GLushort indices[3] = {
-		0, 1, 2
+	GLushort indices[6] = {
+		0, 3, 2,
+        0, 2, 1
 	};
 	
 	if (! self.vbo && ! self.ebo) {
@@ -87,12 +83,11 @@ GLuint colorLocation = 1;
 		// 2. Binding
 		//
 		glBindBuffer(GL_ARRAY_BUFFER, self.vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 21, vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, vertices, GL_STATIC_DRAW);
 		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 3 , indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * 6 , indices, GL_STATIC_DRAW);
 	}
-	
 }
 
 - (void)setupVAOs {
@@ -118,31 +113,28 @@ GLuint colorLocation = 1;
 							  3,
 							  GL_FLOAT,
 							  GL_FALSE,
-							  7 * sizeof(GLfloat),
+							  3 * sizeof(GLfloat),
 							  0);
 		glEnableVertexAttribArray(vertexLocation);
-		
-		glVertexAttribPointer(colorLocation,
-							  4,
-							  GL_FLOAT,
-							  GL_FALSE,
-							  7 * sizeof(GLfloat),
-							  (const void *)(3 * sizeof(GLfloat)));
-		
-		glEnableVertexAttribArray(colorLocation);
-	}
-}
+        
+        // The mvp matrix
+        //
+        CGFloat screenWidth = CGRectGetWidth(self.view.bounds);
+        CGFloat screenHeight = CGRectGetHeight(self.view.bounds);
+        
+        GLint modelMatrixLocation = glGetUniformLocation(self.program, "modelMatrix");
+        GLKMatrix4 modelMatrix4 = GLKMatrix4MakeRotation(degreedToRadius(55), 1.0, 0, 0);
+        glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrix4.m);
+        
+        GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
+        GLKMatrix4 viewMatrix4 = GLKMatrix4MakeTranslation(0, 0, -1.5);
+        glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix4.m);
 
-- (void)setupTexture {
-    
-    glGenTextures(1, &_texture);
-    glBindTexture(GL_TEXTURE_2D, self.texture);
-    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
+        GLint projectionMatrixLocation = glGetUniformLocation(self.program, "projectionMatrix");
+        GLKMatrix4 projectionMatrix4 = GLKMatrix4MakePerspective(degreedToRadius(45.0), screenWidth/screenHeight, 0.1, 100);
+        glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix4.m);
+        
+    }
 }
 
 - (void)drawWithoutVBO {
@@ -166,6 +158,9 @@ GLuint colorLocation = 1;
 }
 
 - (void)drawWithVBO {
+    
+    UIView *view = [[UIView alloc] init];
+    view.transform = CGAffineTransformMakeScale(2, 2);
     
 	[self setupVBO];
     
@@ -203,11 +198,11 @@ GLuint colorLocation = 1;
 	// Setup the vao if needed
 	//
 	[self setupVAOs];
-	
+    
 	// Draw the elements
 	//
 	glBindVertexArray (self.vao);
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 	glBindVertexArray(0);
 }
 
@@ -216,8 +211,9 @@ GLuint colorLocation = 1;
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
     
     glViewport ( 0, 0, (int)self.glkView.drawableWidth, (int)self.glkView.drawableHeight);
-    glClearColor(0.4, 0.4, 0.4, 1.0);
-    glClear ( GL_COLOR_BUFFER_BIT );
+    
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glUseProgram(self.program);
 	
 	[self setupVAOs];
@@ -229,6 +225,7 @@ GLuint colorLocation = 1;
 - (GLKView *)glkView {
     
     if (! _glkView) {
+        
         _glkView = [[GLKView alloc] initWithFrame:self.view.bounds];
         _glkView.delegate = self;
         _glkView.context = self.context;

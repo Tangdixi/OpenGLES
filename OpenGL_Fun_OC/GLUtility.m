@@ -161,8 +161,8 @@
     return textureData;
 }
 
-const void* bufferOffset(NSUInteger offset) {
-	return (const void*)(offset);
+CGFloat degreedToRadius(CGFloat degreed) {
+    return degreed * M_PI / 180;
 }
 
 @end
