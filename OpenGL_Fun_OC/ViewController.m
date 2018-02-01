@@ -20,6 +20,7 @@
 @property (nonatomic, assign) GLuint vbo;
 @property (nonatomic, assign) GLuint ebo;
 @property (nonatomic, assign) GLuint vao;
+@property (nonatomic, assign) GLuint texture;
 
 @end
 
@@ -36,6 +37,9 @@ GLuint colorLocation = 1;
     
     [self setupViews];
     [self setupGL];
+    
+    
+    
 }
 
 #pragma mark - Private
@@ -127,6 +131,18 @@ GLuint colorLocation = 1;
 		
 		glEnableVertexAttribArray(colorLocation);
 	}
+}
+
+- (void)setupTexture {
+    
+    glGenTextures(1, &_texture);
+    glBindTexture(GL_TEXTURE_2D, self.texture);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
 }
 
 - (void)drawWithoutVBO {

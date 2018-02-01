@@ -8,6 +8,8 @@
 
 @import Foundation;
 @import OpenGLES;
+@import CoreGraphics;
+@import UIKit;
 
 typedef NS_ENUM(GLuint, GLUtilityShaderType) {
     GLUtilityShaderTypeNone = 0,
@@ -33,5 +35,11 @@ typedef NS_ENUM(GLuint, GLUtilityShaderType) {
  @return The program's ID
  */
 + (GLuint)programWithVertexShader:(GLuint)vertexShader fragmentShader:(GLuint)fragmentShader;
+
+/**
+ @brief Load an image and convert it into a GLbyte's raw data
+ @param imageName The image name, only for .png format
+ */
++ (GLubyte *)textureDatasWithImageName:(NSString *)imageName;
 
 @end

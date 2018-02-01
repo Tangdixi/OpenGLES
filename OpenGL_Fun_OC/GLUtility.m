@@ -80,18 +80,14 @@
     GLuint program = glCreateProgram();
     
     if (! program) {
-#if DEBUG
         NSLog(@"GLUtility: Create program failed: %s, %d", __FUNCTION__, __LINE__);
-#endif
         return 0;
     }
     
     // 2. Validate the shaders
     //
     if (! vertexShader || ! fragmentShader) {
-#if DEBUG
         NSLog(@"GLUtility: Invalid shader: %s, %d", __FUNCTION__, __LINE__);
-#endif
         return 0;
     }
     
@@ -108,9 +104,9 @@
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
     
     if (! linked) {
-#if DEBUG
+
         NSLog(@"GLUtility: Link program failed: %s, %d", __FUNCTION__, __LINE__);
-        
+#if DEBUG
         GLint infoLength = 0;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLength);
         
@@ -135,6 +131,34 @@
     glDeleteProgram(fragmentShader);
     
     return program;
+}
+
++ (GLubyte *)textureDatasWithImageName:(NSString *)imageName {
+    
+    UIImage *image = [UIImage imageNamed:imageName];
+    
+    if (!image) {
+        NSLog(@"GLUtility: Load texture failed: invalid image name %s, %d", __FUNCTION__, __LINE__);
+        
+        return NULL;
+    }
+    
+    CGImageRef imageRef = image.CGImage;
+    
+    size_t width = CGImageGetWidth(imageRef);
+    size_t height = CGImageGetHeight(imageRef);
+    
+    GLubyte *textureData = (GLubyte *) calloc(width*height*4, sizeof(GLubyte));
+    
+    CGContextRef spriteContext = CGBitmapContextCreate(textureData, width, height, 8, width*4,
+                                                       CGImageGetColorSpace(imageRef), kCGImageAlphaPremultipliedLast);
+    
+    
+    CGContextDrawImage(spriteContext, CGRectMake(0, 0, width, height), imageRef);
+    
+    CGContextRelease(spriteContext);
+    
+    return textureData;
 }
 
 const void* bufferOffset(NSUInteger offset) {
