@@ -5,6 +5,7 @@ layout(location = 1) in vec4 aColorPosition;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 orthograhicMatrix;
 
 out vec4 colorPosition;
 

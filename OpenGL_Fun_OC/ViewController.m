@@ -19,6 +19,7 @@
 
 @property (nonatomic, assign) GLuint vbo;
 @property (nonatomic, assign) GLuint ebo;
+
 @property (nonatomic, assign) GLuint vao;
 @property (nonatomic, assign) GLuint texture;
 
@@ -37,6 +38,7 @@ GLuint colorLocation = 1;
     
     [self setupViews];
     [self setupGL];
+    self.view.transform = CGAffineTransformIdentity;
 }
 
 #pragma mark - Private
@@ -117,24 +119,61 @@ GLuint colorLocation = 1;
 							  0);
 		glEnableVertexAttribArray(vertexLocation);
         
-        // The mvp matrix
-        //
-        CGFloat screenWidth = CGRectGetWidth(self.view.bounds);
-        CGFloat screenHeight = CGRectGetHeight(self.view.bounds);
-        
-        GLint modelMatrixLocation = glGetUniformLocation(self.program, "modelMatrix");
-        GLKMatrix4 modelMatrix4 = GLKMatrix4MakeRotation(degreedToRadius(55), 1.0, 0, 0);
-        glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrix4.m);
-        
-        GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
-        GLKMatrix4 viewMatrix4 = GLKMatrix4MakeTranslation(0, 0, -1.5);
-        glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix4.m);
-
-        GLint projectionMatrixLocation = glGetUniformLocation(self.program, "projectionMatrix");
-        GLKMatrix4 projectionMatrix4 = GLKMatrix4MakePerspective(degreedToRadius(45.0), screenWidth/screenHeight, 0.1, 100);
-        glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix4.m);
-        
+        [self activePerspective];
+//        [self activeTransform];
+//        [self resetPerspective];
     }
+}
+
+- (void)activePerspective {
+    
+    // The mvp matrix
+    //
+    CGFloat screenWidth = CGRectGetWidth(self.view.bounds);
+    CGFloat screenHeight = CGRectGetHeight(self.view.bounds);
+    CGFloat aspectRatio = screenWidth/screenHeight;
+    
+    GLint modelMatrixLocation = glGetUniformLocation(self.program, "modelMatrix");
+    GLKMatrix4 modelMatrix4 = GLKMatrix4MakeRotation(degreedToRadius(45), 0, 1.0, 0);
+    glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrix4.m);
+    
+    GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
+    GLKMatrix4 viewMatrix4 = GLKMatrix4MakeTranslation(0, 0, -3);
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix4.m);
+    
+    GLint projectionMatrixLocation = glGetUniformLocation(self.program, "projectionMatrix");
+    GLKMatrix4 projectionMatrix4 = GLKMatrix4MakePerspective(degreedToRadius(45.0), screenWidth/screenHeight, 0.1, 100);
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix4.m);
+}
+
+- (void)activeTransform {
+    
+    GLint modelMatrixLocation = glGetUniformLocation(self.program, "modelMatrix");
+    GLKMatrix4 modelMatrix4 = GLKMatrix4MakeRotation(degreedToRadius(45), 0, 0, 1.0);
+    glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrix4.m);
+    
+    GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
+    GLKMatrix4 viewMatrix4 = GLKMatrix4MakeTranslation(0.5, 0, 0);
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix4.m);
+    
+    GLint projectionMatrixLocation = glGetUniformLocation(self.program, "projectionMatrix");
+    GLKMatrix4 projectionMatrix4 = GLKMatrix4Identity;
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix4.m);
+}
+
+- (void)resetPerspective {
+    
+    GLint modelMatrixLocation = glGetUniformLocation(self.program, "modelMatrix");
+    GLKMatrix4 modelMatrix4 = GLKMatrix4Identity;
+    glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrix4.m);
+    
+    GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
+    GLKMatrix4 viewMatrix4 = GLKMatrix4Identity;
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix4.m);
+    
+    GLint projectionMatrixLocation = glGetUniformLocation(self.program, "projectionMatrix");
+    GLKMatrix4 projectionMatrix4 = GLKMatrix4Identity;
+    glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix4.m);
 }
 
 - (void)drawWithoutVBO {
@@ -210,7 +249,17 @@ GLuint colorLocation = 1;
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
     
-    glViewport ( 0, 0, (int)self.glkView.drawableWidth, (int)self.glkView.drawableHeight);
+    float m[16] = {
+        0.33,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
+    };
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(m);
+    
+    glViewport (0, 0,
+                (int)self.glkView.drawableWidth, (int)self.glkView.drawableHeight);
     
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
