@@ -23,6 +23,9 @@
 @property (nonatomic, assign) GLuint vao;
 @property (nonatomic, assign) GLuint texture;
 
+@property (nonatomic, assign) GLint currentTimeStamp;
+@property (nonatomic, assign) CGFloat currentAngle;
+
 @end
 
 @implementation ViewController
@@ -123,6 +126,7 @@ GLuint colorLocation = 1;
 //        [self activeTransform];
 //        [self resetPerspective];
     }
+    [self moveCamera];
 }
 
 - (void)activePerspective {
@@ -146,15 +150,31 @@ GLuint colorLocation = 1;
     glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, projectionMatrix4.m);
 }
 
+- (void)moveCamera {
+    
+    self.currentAngle += degreedToRadius(1);
+    if (self.currentAngle > (2.0 * M_PI)) {
+        self.currentAngle = self.currentAngle - (2.0 * M_PI);
+    }
+    
+    GLfloat radius = 3;
+    GLfloat x = sinf(self.currentAngle) * radius;
+    GLfloat z = cosf(self.currentAngle) * radius;
+    
+    GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
+    GLKMatrix4 viewMatrix = GLKMatrix4MakeLookAt(x, 0, z,
+                                                 0, 0, 0,
+                                                 0, 1, 0);
+    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix.m);
+}
+
 - (void)activeTransform {
     
     GLint modelMatrixLocation = glGetUniformLocation(self.program, "modelMatrix");
     GLKMatrix4 modelMatrix4 = GLKMatrix4MakeRotation(degreedToRadius(45), 0, 0, 1.0);
     glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, modelMatrix4.m);
     
-    GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
-    GLKMatrix4 viewMatrix4 = GLKMatrix4MakeTranslation(0.5, 0, 0);
-    glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix4.m);
+    [self moveCamera];
     
     GLint projectionMatrixLocation = glGetUniformLocation(self.program, "projectionMatrix");
     GLKMatrix4 projectionMatrix4 = GLKMatrix4Identity;
@@ -249,14 +269,7 @@ GLuint colorLocation = 1;
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect {
     
-    float m[16] = {
-        0.33,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        0,0,0,1
-    };
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(m);
+    self.currentTimeStamp = (self.currentTimeStamp + 1) % 60;
     
     glViewport (0, 0,
                 (int)self.glkView.drawableWidth, (int)self.glkView.drawableHeight);
