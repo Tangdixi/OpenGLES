@@ -19,6 +19,12 @@
 
 @property (nonatomic, assign) GLuint vbo;
 @property (nonatomic, assign) GLuint ebo;
+@property (nonatomic, assign) GLuint nbo;
+
+@property (nonatomic, assign) GLfloat *vertices;
+@property (nonatomic, assign) GLushort *indices;
+@property (nonatomic, assign) GLfloat *normals;
+@property (nonatomic, assign) GLfloat *triangleNormals;
 
 @property (nonatomic, assign) GLuint vao;
 @property (nonatomic, assign) GLuint texture;
@@ -26,13 +32,14 @@
 @property (nonatomic, assign) GLint currentTimeStamp;
 @property (nonatomic, assign) CGFloat currentAngle;
 
-@property (nonatomic, strong) UISlider *colorSlider;
-
 @end
 
 @implementation ViewController
 
+#pragma mark - location in shaders
+
 GLuint vertexLocation = 0;
+GLuint normalLocation = 1;
 
 #pragma mark - Life Cycle
 
@@ -45,18 +52,10 @@ GLuint vertexLocation = 0;
     self.view.transform = CGAffineTransformIdentity;
 }
 
-#pragma mark - Actions
-
-- (void)colorSliderValueChanged:(UISlider *)sender {
-    [self setupLightingWithGreen:sender.value * 255];
-}
-
 #pragma mark - Private
 
 - (void)setupViews {
     self.view = self.glkView;
-    
-    [self.view addSubview:self.colorSlider];
 }
 
 - (void)setupGL {
@@ -75,40 +74,62 @@ GLuint vertexLocation = 0;
 
 - (void)setupVBO {
 	
-	GLfloat vertices[24] = {
-		0.5f, 0.5f, 0.5f,
-		-0.5f, 0.5f, 0.5f,
-		-0.5f, -0.5f, 0.5f,
-		0.5f, -0.5f, 0.5f,
-        0.5f, 0.5f, -0.5f,
-        -0.5f, 0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
+	GLfloat vertices[] = {
+		
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		
+		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
 	
-	GLushort indices[36] = {
-		0, 3, 2, 0, 2, 1,
-        0, 1, 5, 0, 5, 4,
-        0, 4, 7, 0, 7, 3,
-        1, 2, 6, 1, 6, 5,
-        3, 2, 6, 3, 6, 7,
-        6, 5, 7, 5, 4, 7
-	};
-	
-	if (! self.vbo && ! self.ebo) {
+	if (! self.vbo) {
 		
 		// 1. Generate buffer object
 		//
 		glGenBuffers(1, &_vbo);
-		glGenBuffers(1, &_ebo);
 		
 		// 2. Binding
 		//
 		glBindBuffer(GL_ARRAY_BUFFER, self.vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * sizeof(vertices), vertices, GL_STATIC_DRAW);
 		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * sizeof(indices) , indices, GL_STATIC_DRAW);
 	}
 }
 
@@ -129,20 +150,27 @@ GLuint vertexLocation = 0;
 		// 3. Assign the values
 		//
 		glBindBuffer(GL_ARRAY_BUFFER, self.vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo);
 		
 		glVertexAttribPointer(vertexLocation,
 							  3,
 							  GL_FLOAT,
 							  GL_FALSE,
-							  3 * sizeof(GLfloat),
+							  6 * sizeof(GLfloat),
 							  0);
 		glEnableVertexAttribArray(vertexLocation);
-        
+		
+		glVertexAttribPointer(normalLocation,
+							  3,
+							  GL_FLOAT,
+							  GL_FALSE,
+							  6 * sizeof(GLfloat),
+							  (void *)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(normalLocation);
+		
         [self activePerspective];
-        [self setupLightingWithGreen:60];
+        [self setupLighting];
     }
-    [self moveCamera];
+//    [self moveCamera];
 }
 
 - (void)activePerspective {
@@ -178,22 +206,27 @@ GLuint vertexLocation = 0;
     GLfloat z = cosf(self.currentAngle) * radius;
     
     GLint viewMatrixLocation = glGetUniformLocation(self.program, "viewMatrix");
-    GLKMatrix4 viewMatrix = GLKMatrix4MakeLookAt(x, 0, z,
+    GLKMatrix4 viewMatrix = GLKMatrix4MakeLookAt(x, 1.5, z,
                                                  0, 0, 0,
                                                  0, 1, 0);
     glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, viewMatrix.m);
 }
 
-- (void)setupLightingWithGreen:(CGFloat)greenValue {
+- (void)setupLighting {
+    
     // The camera position is also the light source
     GLint cubeColorLocation = glGetUniformLocation(self.program, "color");
-    GLKVector3 cubeColorVector3 = GLKVector3Make(1, 1, 1);
+    GLKVector3 cubeColorVector3 = GLKVector3Make(66/255.0, 134/255.0, 244/255.0);
     glUniform3fv(cubeColorLocation, 1, cubeColorVector3.v);
     
-    // 163, 58, 114
     GLint lightColorLocation = glGetUniformLocation(self.program, "lightColor");
-    GLKVector3 lightColorVector3 = GLKVector3Make(163/255.0, greenValue/255.0, 114/255.0);
+    GLKVector3 lightColorVector3 = GLKVector3Make(1, 1, 1);
     glUniform3fv(lightColorLocation, 1, lightColorVector3.v);
+	
+	GLint lightPositionLocation = glGetUniformLocation(self.program, "lightPosition");
+	GLKVector3 lightPositionVector3 = GLKVector3Make(-1.2, 1.2f, 2.0f);
+	glUniform3fv(lightPositionLocation, 1, lightPositionVector3.v);
+	
 }
 
 - (void)drawWithVAO {
@@ -205,7 +238,8 @@ GLuint vertexLocation = 0;
 	// Draw the elements
 	//
 	glBindVertexArray (self.vao);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+//	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
 
@@ -218,7 +252,7 @@ GLuint vertexLocation = 0;
     glViewport (0, 0,
                 (int)self.glkView.drawableWidth, (int)self.glkView.drawableHeight);
     
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(0, 0, 0, 1.0);
     glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glUseProgram(self.program);
 	
@@ -247,16 +281,6 @@ GLuint vertexLocation = 0;
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
     }
     return _context;
-}
-
-- (UISlider *)colorSlider {
-    if (! _colorSlider) {
-        _colorSlider = [[UISlider alloc] initWithFrame:CGRectMake(0, 0, 200, 44)];
-        _colorSlider.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height - 50);
-        
-        [_colorSlider addTarget:self action:@selector(colorSliderValueChanged:) forControlEvents:UIControlEventValueChanged];
-    }
-    return _colorSlider;
 }
 
 @end
