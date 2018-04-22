@@ -2,17 +2,24 @@
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec3 normal;
 
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
+uniform mat4 normalMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 modelViewProjectionMatrix;
 
-out vec3 v_normal;
-out vec3 fragmentPosition;
+uniform vec3 ambientColor;
+uniform vec3 diffuseColor;
+uniform vec3 lightPosition;
+
+out vec3 color;
 
 void main() {
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;
-	v_normal = normal;
 	
-	// Translate to world coordinate
-	fragmentPosition = vec3(modelMatrix * position);
+	vec4 eyeSpaceNormal = normalMatrix * vec4(normal, 1.0);
+	vec4 eyeSpacePosition = modelViewMatrix * position;
+	
+	vec3 lightDirection = normalize(lightPosition - eyeSpacePosition.xyz);
+	float diffuseFactor = max(dot(eyeSpaceNormal.xyz, lightDirection), 0.0);
+	
+	color = ambientColor + diffuseFactor * diffuseColor;
+    gl_Position = modelViewProjectionMatrix * position;
 }

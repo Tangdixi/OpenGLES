@@ -10,6 +10,7 @@
 @import OpenGLES;
 @import CoreGraphics;
 @import UIKit;
+@import GLKit;
 
 typedef NS_ENUM(GLuint, GLUtilityShaderType) {
     GLUtilityShaderTypeNone = 0,
