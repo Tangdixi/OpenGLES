@@ -180,17 +180,8 @@ GLuint normalLocation = 1;
 	
 	// Calculate the camera
 	//
-	self.currentAngle += degreedToRadius(1);
-	if (self.currentAngle > (2.0 * M_PI)) {
-		self.currentAngle = self.currentAngle - (2.0 * M_PI);
-	}
-	
-	GLfloat radius = 3;
-	GLfloat x = sinf(self.currentAngle) * radius;
-	GLfloat z = cosf(self.currentAngle) * radius;
-	
-	GLKMatrix4 modelViewMatrix4 = GLKMatrix4MakeLookAt(-1, 1, 0.2,
-													   0, 0.5, 0,
+	GLKMatrix4 modelViewMatrix4 = GLKMatrix4MakeLookAt(-1.5, 1, 0.25,
+													   0, 0.8, 0,
 													   0, 0.1, 0);
 	GLKMatrix4 projectionMatrix4 = GLKMatrix4MakePerspective(degreedToRadius(45.0),
 															 aspectRatio,
@@ -202,6 +193,22 @@ GLuint normalLocation = 1;
 	glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, modelViewMatrix4.m);
 	glUniformMatrix4fv(modelViewProjectionMatrixLocation, 1, GL_FALSE, modelViewProjectionMatrix4.m);
 	glUniformMatrix4fv(normalMatrixLocation, 1, GL_FALSE, normalMatrix4.m);
+	
+	// Dynamic lighting
+	//
+	self.currentAngle += degreedToRadius(1);
+	if (self.currentAngle > (2.0 * M_PI)) {
+		self.currentAngle = self.currentAngle - (2.0 * M_PI);
+	}
+	
+	GLfloat radius = 1.5;
+	GLfloat x = sinf(self.currentAngle) * radius;
+	GLfloat z = cosf(self.currentAngle) * radius;
+	
+	GLint lightPositionLocation = glGetUniformLocation(self.program, "lightPosition");
+	GLKVector3 lightPositionVector3 = GLKVector3Make(x, 0.5, -2);
+	glUniform3fv(lightPositionLocation, 1, lightPositionVector3.v);
+	
 }
 
 - (void)setupLighting {
@@ -220,7 +227,7 @@ GLuint normalLocation = 1;
 	glUniform3fv(specularColorLocation, 1, specularColorVector3.v);
 	
 	GLint lightPositionLocation = glGetUniformLocation(self.program, "lightPosition");
-	GLKVector3 lightPositionVector3 = GLKVector3Make(0.5, 0.8, -1.7);
+	GLKVector3 lightPositionVector3 = GLKVector3Make(0.5, 0.5, -1.7);
 	glUniform3fv(lightPositionLocation, 1, lightPositionVector3.v);
 }
 
