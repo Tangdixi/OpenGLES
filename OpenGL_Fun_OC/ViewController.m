@@ -189,9 +189,9 @@ GLuint normalLocation = 1;
 	GLfloat x = sinf(self.currentAngle) * radius;
 	GLfloat z = cosf(self.currentAngle) * radius;
 	
-	GLKMatrix4 modelViewMatrix4 = GLKMatrix4MakeLookAt(x, 1.5, z,
-												 0, 0, 0,
-												 0, 1, 0);
+	GLKMatrix4 modelViewMatrix4 = GLKMatrix4MakeLookAt(-1, 1, 0.2,
+													   0, 0.5, 0,
+													   0, 0.1, 0);
 	GLKMatrix4 projectionMatrix4 = GLKMatrix4MakePerspective(degreedToRadius(45.0),
 															 aspectRatio,
 															 0.1,
@@ -202,7 +202,6 @@ GLuint normalLocation = 1;
 	glUniformMatrix4fv(modelViewMatrixLocation, 1, GL_FALSE, modelViewMatrix4.m);
 	glUniformMatrix4fv(modelViewProjectionMatrixLocation, 1, GL_FALSE, modelViewProjectionMatrix4.m);
 	glUniformMatrix4fv(normalMatrixLocation, 1, GL_FALSE, normalMatrix4.m);
-	
 }
 
 - (void)setupLighting {
@@ -216,8 +215,12 @@ GLuint normalLocation = 1;
     GLKVector3 lightColorVector3 = GLKVector3Make(1, 133.0/255, 34.0/255);
     glUniform3fv(lightColorLocation, 1, lightColorVector3.v);
 	
+	GLint specularColorLocation = glGetUniformLocation(self.program, "specularColor");
+	GLKVector3 specularColorVector3 = GLKVector3Make(1, 1, 1);
+	glUniform3fv(specularColorLocation, 1, specularColorVector3.v);
+	
 	GLint lightPositionLocation = glGetUniformLocation(self.program, "lightPosition");
-	GLKVector3 lightPositionVector3 = GLKVector3Make(0.5, 0.5, 1.7);
+	GLKVector3 lightPositionVector3 = GLKVector3Make(0.5, 0.8, -1.7);
 	glUniform3fv(lightPositionLocation, 1, lightPositionVector3.v);
 }
 

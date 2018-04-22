@@ -8,6 +8,7 @@ uniform mat4 modelViewProjectionMatrix;
 
 uniform vec3 ambientColor;
 uniform vec3 diffuseColor;
+uniform vec3 specularColor;
 uniform vec3 lightPosition;
 
 out vec3 color;
@@ -20,6 +21,10 @@ void main() {
 	vec3 lightDirection = normalize(lightPosition - eyeSpacePosition.xyz);
 	float diffuseFactor = max(dot(eyeSpaceNormal.xyz, lightDirection), 0.0);
 	
-	color = ambientColor + diffuseFactor * diffuseColor;
+	vec3 viewDirection = vec3(0, 0, 1);
+	vec3 halfPlane = normalize(lightDirection - viewDirection);
+	float specularFactor = pow(max(dot(eyeSpaceNormal.xyz, halfPlane), 0.0), 256.0);
+	
+	color = ambientColor + diffuseFactor * diffuseColor + specularFactor * specularColor;
     gl_Position = modelViewProjectionMatrix * position;
 }
