@@ -159,12 +159,14 @@ GLuint normalLocation = 1;
 							  (void *)(sizeof(GLfloat) * 3));
 		glEnableVertexAttribArray(normalLocation);
 		
+		[self setupMaterial];
         [self setupLighting];
+		[self setupCamera];
     }
-    [self moveCamera];
+//	[self dynamicLighting];
 }
 
-- (void)moveCamera {
+- (void)setupCamera {
 
 	// The mvp matrix
 	//
@@ -178,19 +180,8 @@ GLuint normalLocation = 1;
 	GLint modelViewProjectionMatrixLocation = glGetUniformLocation(self.program, "modelViewProjectionMatrix");
 	GLint normalMatrixLocation = glGetUniformLocation(self.program, "normalMatrix");
 	
-	// Calculate the camera
-	//
-	self.currentAngle += degreedToRadius(0.5);
-	if (self.currentAngle > (2.0 * M_PI)) {
-		self.currentAngle = self.currentAngle - (2.0 * M_PI);
-	}
-	
-	GLfloat radius = 4;
-	GLfloat x = sinf(self.currentAngle) * radius;
-	GLfloat z = cosf(self.currentAngle) * radius;
-	
-	GLKMatrix4 modelViewMatrix4 = GLKMatrix4MakeLookAt(x, 0, z,
-													   0, 0, 0,
+	GLKMatrix4 modelViewMatrix4 = GLKMatrix4MakeLookAt(1, 1, 1.1,
+													   0, 0.8, 0,
 													   0, 1, 0);
 	GLKMatrix4 projectionMatrix4 = GLKMatrix4MakePerspective(degreedToRadius(45.0),
 															 aspectRatio,
@@ -205,24 +196,57 @@ GLuint normalLocation = 1;
 	
 }
 
-- (void)setupLighting {
-    
-    // The camera position is also the light source
-    GLint cubeColorLocation = glGetUniformLocation(self.program, "ambientColor");
-    GLKVector3 cubeColorVector3 = GLKVector3Make(0.1, 0.1, 0.1);
-    glUniform3fv(cubeColorLocation, 1, cubeColorVector3.v);
-    
-    GLint lightColorLocation = glGetUniformLocation(self.program, "diffuseColor");
-    GLKVector3 lightColorVector3 = GLKVector3Make(1, 0.5, 0.31);
-    glUniform3fv(lightColorLocation, 1, lightColorVector3.v);
+- (void)setupMaterial {
 	
-	GLint specularColorLocation = glGetUniformLocation(self.program, "specularColor");
-	GLKVector3 specularColorVector3 = GLKVector3Make(1, 1, 1);
+	GLint cubeColorLocation = glGetUniformLocation(self.program, "material.ambient");
+	GLKVector3 cubeColorVector3 = GLKVector3Make(0.24725, 0.1995, 0.0745);
+	glUniform3fv(cubeColorLocation, 1, cubeColorVector3.v);
+	
+	GLint lightColorLocation = glGetUniformLocation(self.program, "material.diffuse");
+	GLKVector3 lightColorVector3 = GLKVector3Make(0.75164, 0.60648, 0.22648);
+	glUniform3fv(lightColorLocation, 1, lightColorVector3.v);
+	
+	GLint specularColorLocation = glGetUniformLocation(self.program, "material.specular");
+	GLKVector3 specularColorVector3 = GLKVector3Make(0.628281, 0.555802, 0.366065);
 	glUniform3fv(specularColorLocation, 1, specularColorVector3.v);
 	
-	GLint lightPositionLocation = glGetUniformLocation(self.program, "lightPosition");
-	GLKVector3 lightPositionVector3 = GLKVector3Make(1.5, 0.5, 2);
+	GLint shininessLocation = glGetUniformLocation(self.program, "material.shininess");
+	glUniform1f(shininessLocation, 0.4 * 128.0);
+}
+
+- (void)setupLighting {
+	
+	GLint lightPositionLocation = glGetUniformLocation(self.program, "light.position");
+	GLKVector3 lightPositionVector3 = GLKVector3Make(0.3, 0.45, -2.5);
 	glUniform3fv(lightPositionLocation, 1, lightPositionVector3.v);
+	
+	GLint cubeColorLocation = glGetUniformLocation(self.program, "light.ambient");
+	GLKVector3 cubeColorVector3 = GLKVector3Make(0.3, 0.3, 0.3);
+	glUniform3fv(cubeColorLocation, 1, cubeColorVector3.v);
+	
+	GLint lightColorLocation = glGetUniformLocation(self.program, "light.diffuse");
+	GLKVector3 lightColorVector3 = GLKVector3Make(0.5, 0.5, 0.5);
+	glUniform3fv(lightColorLocation, 1, lightColorVector3.v);
+	
+	GLint specularColorLocation = glGetUniformLocation(self.program, "light.specular");
+	GLKVector3 specularColorVector3 = GLKVector3Make(1, 1, 1);
+	glUniform3fv(specularColorLocation, 1, specularColorVector3.v);
+}
+
+- (void)dynamicLighting {
+	
+	self.currentAngle += degreedToRadius(0.5);
+	if (self.currentAngle > (2.0 * M_PI)) {
+		self.currentAngle = self.currentAngle - (2.0 * M_PI);
+	}
+	
+	GLfloat x = fabs(sinf(self.currentAngle) * 2);
+	GLfloat y = fabs(sinf(self.currentAngle) * 0.7);
+	GLfloat z = fabs(sinf(self.currentAngle) * 1);
+	
+	GLint cubeColorLocation = glGetUniformLocation(self.program, "light.ambient");
+	GLKVector3 cubeColorVector3 = GLKVector3Make(x, y, z);
+	glUniform3fv(cubeColorLocation, 1, cubeColorVector3.v);
 }
 
 - (void)drawWithVAO {
